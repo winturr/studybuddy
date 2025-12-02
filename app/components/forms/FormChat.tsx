@@ -98,7 +98,7 @@ export default function FormChat() {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Write your message..."
-          className="w-full resize-none rounded-3xl px-4 py-2 border-none focus:border-transparent focus:ring-0"
+          className="w-dvh resize-none rounded-3xl px-4 py-2 border-none focus:border-transparent focus:ring-0"
           rows={3}
           aria-label="Type your message"
         ></textarea>
