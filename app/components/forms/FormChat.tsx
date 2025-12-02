@@ -1,7 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { UserRound, Bot } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
@@ -47,11 +47,17 @@ export default function FormChat() {
     }
   }
 
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
   return (
-    <div>
+    <div className="w-full">
       {/* Message Display Area */}
       {messages && messages.length > 0 && (
-        <div className="flex-1 flex flex-col gap-1">
+        <div className="flex-1 flex flex-col gap-1 overflow-y-auto pb-28 px-4">
           {messages.map((message) => (
             <div
               data-loading={isLoading}
@@ -59,11 +65,11 @@ export default function FormChat() {
               className="flex gap-3 p-2 items-start"
             >
               {message.role === "user" ? (
-                <div className="h-10 w-10 aspect-square rounded-full border flex items-center justify-center bg-black">
+                <div className="h-10 w-10 aspect-square rounded-full border flex items-center justify-center bg-neutral-900">
                   <UserRound />
                 </div>
               ) : (
-                <div className="h-10 w-10 aspect-square rounded-full border flex items-center justify-center bg-black">
+                <div className="h-10 w-10 aspect-square rounded-full border flex items-center justify-center bg-neutral-900">
                   <Bot />
                 </div>
               )}
@@ -73,7 +79,7 @@ export default function FormChat() {
                     return (
                       <div
                         key={`${message.id}-${i}`}
-                        className="bg-purple-900 flex flex-col items-start text-left p-3 rounded-md"
+                        className="bg-neutral-900 flex flex-col items-start text-left p-5 rounded-xl"
                       >
                         <div className="[&>p]:mb-3 [&>p]:last:mb-0 [&>ul]:mb-4 [&>ul>li]:list-disc [&>ul>li]:ml-5 [&>ol>li]:list-decimal [&>ol>li]:ml-5">
                           {part.text}
@@ -91,14 +97,14 @@ export default function FormChat() {
       <form
         data-loading={isLoading}
         onSubmit={handleChat}
-        className="form-container w-dwh mx-auto flex-1 sticky bottom-10 flex flex-col gap-2 p-2 border border-gray-500 rounded-3xl"
+        className="form-container fixed left-0 right-0 bottom-[var(--footer-height)] z-50 shadow-2xl w-dwh mx-5 flex flex-col gap-2 p-5 border border-gray-500 rounded-3xl"
       >
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Write your message..."
-          className="w-full resize-none rounded-3xl px-4 py-2 border-none focus:border-transparent focus:ring-0"
+          className="w-full resize-none rounded-xl px- py-2 border-none focus:border-transparent focus:ring-0"
           rows={3}
           aria-label="Type your message"
         ></textarea>
