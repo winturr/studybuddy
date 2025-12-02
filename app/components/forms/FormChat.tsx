@@ -69,7 +69,7 @@ export default function FormChat() {
                   <UserRound />
                 </div>
               ) : (
-                <div className="h-10 w-10 aspect-square rounded-full border border-neutral-700 flex items-center justify-center bg-neutral-900">
+                <div className="h-10 w-10 aspect-square rounded-full border flex items-center justify-center bg-neutral-900">
                   <Bot />
                 </div>
               )}
@@ -79,7 +79,7 @@ export default function FormChat() {
                     return (
                       <div
                         key={`${message.id}-${i}`}
-                        className="bg-neutral-900 flex flex-col items-start text-left p-5 rounded-xl"
+                        className="bg-neutral-900 flex flex-col items-start text-left p-5 rounded-2xl border border-neutral-700"
                       >
                         <div className="[&>p]:mb-3 [&>p]:last:mb-0 [&>ul]:mb-4 [&>ul>li]:list-disc [&>ul>li]:ml-5 [&>ol>li]:list-decimal [&>ol>li]:ml-5">
                           {part.text}
