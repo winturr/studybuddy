@@ -69,7 +69,7 @@ export default function FormChat() {
                   <UserRound />
                 </div>
               ) : (
-                <div className="h-10 w-10 aspect-square rounded-full border flex items-center justify-center bg-neutral-900">
+                <div className="h-10 w-10 aspect-square rounded-full border border-neutral-700 flex items-center justify-center bg-neutral-900">
                   <Bot />
                 </div>
               )}
