@@ -91,14 +91,14 @@ export default function FormChat() {
       <form
         data-loading={isLoading}
         onSubmit={handleChat}
-        className="max-w-md w-full mx-auto flex-1 sticky bottom-10 flex flex-col gap-2 p-2 border border-gray-500 rounded-3xl"
+        className="form-container w-dwh mx-auto flex-1 sticky bottom-10 flex flex-col gap-2 p-2 border border-gray-500 rounded-3xl"
       >
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Write your message..."
-          className="w-dvh resize-none rounded-3xl px-4 py-2 border-none focus:border-transparent focus:ring-0"
+          className="w-full resize-none rounded-3xl px-4 py-2 border-none focus:border-transparent focus:ring-0"
           rows={3}
           aria-label="Type your message"
         ></textarea>

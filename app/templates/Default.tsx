@@ -5,7 +5,9 @@ import FormChat from "../components/forms/FormChat";
 export default function Default({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col min-h-dvh">
-      <Header />
+      <div className="sticky top-0 backdrop-blur-sm">
+        <Header />
+      </div>
       <main className="container mx-auto p-5 flex-1">{children}</main>
       <Footer />
     </div>
