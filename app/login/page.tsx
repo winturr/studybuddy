@@ -1,17 +1,24 @@
 import Link from "next/link";
 import Default from "../templates/Default";
 import Logo from "@/app/components/Logo";
+import Bare from "../templates/Bare";
+import FormLogin from "../components/forms/FormLogin";
 
 export default function Login() {
   return (
-    <section>
-      <Default>
-        <div className="container mx-auto p-5">
-          <h1 className="bg-clip-text text-transparent text-2xl sm:text-3xl font-thin bg-green-500">
-            Login Page
+    <Bare>
+      <div className="justify-center items-center flex flex-col gap-10 w-full max-w-md mx-auto">
+        <Link href="/">
+          <Logo />
+        </Link>
+        <div className="w-full">
+          <h1 className="text-2xl font-black text-center mb-6 text-green-600">
+            LOG_IN
           </h1>
+          {/** Form */}
+          <FormLogin />
         </div>
-      </Default>
-    </section>
+      </div>
+    </Bare>
   );
 }
