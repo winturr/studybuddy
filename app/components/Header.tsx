@@ -13,13 +13,13 @@ export default function Header() {
             href="/login"
             className="button button-default text-xs sm:text-sm md:text-base py-1.5 px-2 sm:py-2 sm:px-3 md:py-3 md:px-5"
           >
-            LOG-IN
+            LOG_IN
           </Link>
           <Link
             href="/register"
             className="button button-default text-xs sm:text-sm md:text-base py-1.5 px-2 sm:py-2 sm:px-3 md:py-3 md:px-5"
           >
-            SIGN-UP
+            SIGN_UP
           </Link>
         </div>
       </div>

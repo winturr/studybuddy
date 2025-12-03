@@ -12,7 +12,7 @@ export default function Signup() {
         </Link>
         <div className="w-full">
           <h1 className="text-2xl font-black text-center mb-6 text-green-600">
-            -- CREATE-AN-ACCOUNT --
+            CREATE_AN_ACCOUNT
           </h1>
           {/** Form */}
           <FormSignup />
