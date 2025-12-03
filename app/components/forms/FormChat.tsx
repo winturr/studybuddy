@@ -5,10 +5,20 @@ import { useState, useRef, useEffect } from "react";
 import { UserRound, Bot, SendHorizonal, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
+function formatTimestamp(date: Date): string {
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+  const seconds = date.getSeconds().toString().padStart(2, "0");
+  return `[${hours}:${minutes}:${seconds}]`;
+}
+
 export default function FormChat() {
   const [error, setError] = useState("");
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [messageTimestamps, setMessageTimestamps] = useState<
+    Record<string, Date>
+  >({});
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -53,6 +63,18 @@ export default function FormChat() {
     }
   }, [messages]);
 
+  // Track timestamps for new messages
+  useEffect(() => {
+    messages.forEach((message) => {
+      if (!messageTimestamps[message.id]) {
+        setMessageTimestamps((prev) => ({
+          ...prev,
+          [message.id]: new Date(),
+        }));
+      }
+    });
+  }, [messages, messageTimestamps]);
+
   return (
     <div className="w-full h-full flex flex-col min-h-0">
       {/* Message Display Area */}
@@ -87,9 +109,18 @@ export default function FormChat() {
                           className={`flex flex-col p-3 sm:p-5 border ${
                             isUser
                               ? "bg-neutral-900 text-green-600 border-green-700 border-2 items-end text-right"
-                              : "bg-neutral-900 items-start text-left border-neutral-700"
+                              : "bg-neutral-900 text-neutral-500 items-start text-left border-neutral-700"
                           }`}
                         >
+                          <span
+                            className={`font-mono text-xs mb-2 ${
+                              isUser ? "text-green-500/70" : "text-neutral-500"
+                            }`}
+                          >
+                            {messageTimestamps[message.id]
+                              ? formatTimestamp(messageTimestamps[message.id])
+                              : formatTimestamp(new Date())}
+                          </span>
                           <div className="prose prose-sm sm:prose-base prose-invert max-w-none [&>p]:mb-2 sm:[&>p]:mb-3 [&>p:last-child]:mb-0 [&>ul]:mb-3 sm:[&>ul]:mb-4 [&>ul]:list-disc [&>ul]:pl-4 sm:[&>ul]:pl-5 [&>ol]:mb-3 sm:[&>ol]:mb-4 [&>ol]:list-decimal [&>ol]:pl-4 sm:[&>ol]:pl-5 [&>li]:mb-1 [&>h1]:text-lg sm:[&>h1]:text-xl [&>h1]:font-bold [&>h1]:mb-2 sm:[&>h1]:mb-3 [&>h2]:text-base sm:[&>h2]:text-lg [&>h2]:font-bold [&>h2]:mb-2 [&>h3]:font-bold [&>h3]:mb-2 [&>pre]:bg-neutral-800 [&>pre]:p-2 sm:[&>pre]:p-3 [&>pre]:rounded [&>pre]:overflow-x-auto [&>pre]:text-xs sm:[&>pre]:text-sm [&>code]:bg-neutral-800 [&>code]:px-1 [&>code]:rounded [&>code]:text-xs sm:[&>code]:text-sm">
                             <ReactMarkdown>{part.text}</ReactMarkdown>
                           </div>
