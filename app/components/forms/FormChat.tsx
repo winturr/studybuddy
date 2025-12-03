@@ -56,7 +56,7 @@ export default function FormChat() {
   return (
     <div className="w-full h-full flex flex-col min-h-0">
       {/* Message Display Area */}
-      <div className="flex-1 flex flex-col gap-1 overflow-y-auto min-h-0 px-4">
+      <div className="flex-1 flex flex-col gap-1 overflow-y-auto min-h-0 px-2 sm:px-4 text-sm sm:text-base">
         {messages &&
           messages.length > 0 &&
           messages.map((message) => {
@@ -70,12 +70,12 @@ export default function FormChat() {
                 }`}
               >
                 {isUser ? (
-                  <div className="h-10 w-10 aspect-square text-green-600 border border-green-600 flex items-center justify-center bg-neutral-900">
-                    <UserRound />
+                  <div className="h-8 w-8 sm:h-10 sm:w-10 aspect-square text-green-600 border border-green-600 flex items-center justify-center bg-neutral-900">
+                    <UserRound className="h-4 w-4 sm:h-5 sm:w-5" />
                   </div>
                 ) : (
-                  <div className="h-10 w-10 aspect-square border text-neutral-700 border-neutral-700 flex items-center justify-center bg-neutral-900">
-                    <Bot />
+                  <div className="h-8 w-8 sm:h-10 sm:w-10 aspect-square border text-neutral-700 border-neutral-700 flex items-center justify-center bg-neutral-900">
+                    <Bot className="h-4 w-4 sm:h-5 sm:w-5" />
                   </div>
                 )}
                 {message.parts.map((part, i) => {
@@ -84,13 +84,13 @@ export default function FormChat() {
                       return (
                         <div
                           key={`${message.id}-${i}`}
-                          className={`flex flex-col p-5 border ${
+                          className={`flex flex-col p-3 sm:p-5 border ${
                             isUser
                               ? "bg-neutral-900 text-white border-green-700 border-2 items-end text-right"
                               : "bg-neutral-900 items-start text-left border-neutral-700"
                           }`}
                         >
-                          <div className="prose prose-invert max-w-none [&>p]:mb-3 [&>p:last-child]:mb-0 [&>ul]:mb-4 [&>ul]:list-disc [&>ul]:pl-5 [&>ol]:mb-4 [&>ol]:list-decimal [&>ol]:pl-5 [&>li]:mb-1 [&>h1]:text-xl [&>h1]:font-bold [&>h1]:mb-3 [&>h2]:text-lg [&>h2]:font-bold [&>h2]:mb-2 [&>h3]:font-bold [&>h3]:mb-2 [&>pre]:bg-neutral-800 [&>pre]:p-3 [&>pre]:rounded [&>pre]:overflow-x-auto [&>code]:bg-neutral-800 [&>code]:px-1 [&>code]:rounded">
+                          <div className="prose prose-sm sm:prose-base prose-invert max-w-none [&>p]:mb-2 sm:[&>p]:mb-3 [&>p:last-child]:mb-0 [&>ul]:mb-3 sm:[&>ul]:mb-4 [&>ul]:list-disc [&>ul]:pl-4 sm:[&>ul]:pl-5 [&>ol]:mb-3 sm:[&>ol]:mb-4 [&>ol]:list-decimal [&>ol]:pl-4 sm:[&>ol]:pl-5 [&>li]:mb-1 [&>h1]:text-lg sm:[&>h1]:text-xl [&>h1]:font-bold [&>h1]:mb-2 sm:[&>h1]:mb-3 [&>h2]:text-base sm:[&>h2]:text-lg [&>h2]:font-bold [&>h2]:mb-2 [&>h3]:font-bold [&>h3]:mb-2 [&>pre]:bg-neutral-800 [&>pre]:p-2 sm:[&>pre]:p-3 [&>pre]:rounded [&>pre]:overflow-x-auto [&>pre]:text-xs sm:[&>pre]:text-sm [&>code]:bg-neutral-800 [&>code]:px-1 [&>code]:rounded [&>code]:text-xs sm:[&>code]:text-sm">
                             <ReactMarkdown>{part.text}</ReactMarkdown>
                           </div>
                         </div>
@@ -106,15 +106,15 @@ export default function FormChat() {
       <form
         data-loading={isLoading}
         onSubmit={handleChat}
-        className="form-container shrink-0 mt-4 w-full mx-auto flex flex-col gap-2 p-5 border border-neutral-700"
+        className="form-container shrink-0 mt-2 sm:mt-4 w-full mx-auto flex flex-col gap-2 p-3 sm:p-5 border border-neutral-700"
       >
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Write your message..."
-          className="w-full resize-none rounded-xl px- py-2 border-none focus:border-transparent focus:ring-0"
-          rows={3}
+          className="w-full resize-none rounded-xl px-2 py-2 border-none focus:border-transparent focus:ring-0 text-sm sm:text-base"
+          rows={2}
           aria-label="Type your message"
         ></textarea>
 

@@ -5,11 +5,11 @@ export default function Home() {
   return (
     <Default>
       <div className="flex flex-col h-full min-h-0">
-        <div className="shrink-0 text-center py-4">
-          <span className="bg-clip-text text-transparent text-5xl font-bold bg-linear-to-r from-green-500 to-green-300">
+        <div className="shrink-0 text-center py-2 sm:py-4 px-4">
+          <span className="bg-clip-text text-transparent text-3xl sm:text-5xl font-bold bg-linear-to-r from-green-500 to-green-300">
             Hello, Guest!
           </span>
-          <p className="mt-2">
+          <p className="mt-1 sm:mt-2 text-sm sm:text-base">
             Create an account and log in to access your personalized study
             assistant.
           </p>
