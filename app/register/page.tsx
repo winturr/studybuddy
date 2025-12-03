@@ -16,6 +16,15 @@ export default function Signup() {
           </h1>
           {/** Form */}
           <FormSignup />
+          <p className="text-center mt-6 text-green-500 text-sm font-mono">
+            Already have an account?{" "}
+            <Link
+              href="/login"
+              className="text-green-400 hover:text-green-300 underline"
+            >
+              LOG_IN
+            </Link>
+          </p>
         </div>
       </div>
     </Bare>

@@ -47,9 +47,33 @@ body::after {
   z-index: -1;
 }
 .button {
-  @apply flex py-3 px-5 transition-all ease-in-out duration-200;
+  @apply flex py-3 px-5 transition-all ease-in-out duration-200 relative overflow-hidden;
   &.button-default {
     @apply text-green-600 font-medium border border-green-600 bg-green-500/8 hover:bg-green-800 mx-auto;
+  }
+
+  /* Scanline overlay */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.25) 50%);
+    background-size: 100% 4px;
+    z-index: 10;
+    transition: opacity 0.2s ease;
+  }
+
+  &:hover {
+    animation: crt-flicker 4s infinite;
+    text-shadow: 0 0 8px rgba(34, 197, 94, 0.8), -2px 0 rgba(239, 68, 68, 0.4),
+      2px 0 rgba(59, 130, 246, 0.4);
+
+    &::before {
+      opacity: 1;
+      animation: crt-scanline 8s linear infinite;
+    }
   }
 }
 
@@ -59,4 +83,72 @@ form textarea:focus-visible {
   box-shadow: none !important;
   -webkit-box-shadow: none !important;
   border-color: inherit !important;
+}
+
+/* CRT Logo Animations */
+@keyframes crt-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  93% {
+    opacity: 0.8;
+  }
+  94% {
+    opacity: 1;
+  }
+  97% {
+    opacity: 0.9;
+  }
+  98% {
+    opacity: 1;
+  }
+}
+
+@keyframes crt-scanline {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 100%;
+  }
+}
+
+@keyframes crt-shift-left {
+  0%,
+  100% {
+    transform: translateX(-1px);
+  }
+  50% {
+    transform: translateX(-2px);
+  }
+}
+
+@keyframes crt-shift-right {
+  0%,
+  100% {
+    transform: translateX(1px);
+  }
+  50% {
+    transform: translateX(2px);
+  }
+}
+
+.animate-crt-flicker {
+  animation: crt-flicker 4s infinite;
+}
+
+.animate-crt-scanline {
+  animation: crt-scanline 8s linear infinite;
+}
+
+.animate-crt-shift-left {
+  animation: crt-shift-left 0.05s infinite;
+}
+
+.animate-crt-shift-right {
+  animation: crt-shift-right 0.05s infinite;
 }

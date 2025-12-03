@@ -1,6 +1,6 @@
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
-import FormChat from "../components/forms/FormChat";
+import { Toaster } from "react-hot-toast";
 
 export default function Default({ children }: { children: React.ReactNode }) {
   return (

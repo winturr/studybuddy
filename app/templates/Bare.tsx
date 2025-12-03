@@ -1,3 +1,7 @@
+"use client";
+
+import { Toaster } from "react-hot-toast";
+
 export default function Bare({
   className,
   children,
@@ -12,6 +16,17 @@ export default function Bare({
       >
         {children}
       </div>
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          style: {
+            zIndex: 9999,
+          },
+        }}
+        containerStyle={{
+          zIndex: 9999,
+        }}
+      />
     </section>
   );
 }
