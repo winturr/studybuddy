@@ -6,7 +6,7 @@ export default function Home() {
     <Default>
       <div className="flex flex-col h-full min-h-0">
         <div className="shrink-0 text-center py-4">
-          <span className="bg-clip-text text-transparent text-5xl font-bold bg-linear-to-r from-blue-500 to-blue-300">
+          <span className="bg-clip-text text-transparent text-5xl font-bold bg-linear-to-r from-green-500 to-green-300">
             Hello, Guest!
           </span>
           <p className="mt-2">

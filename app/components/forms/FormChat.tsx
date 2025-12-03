@@ -70,11 +70,11 @@ export default function FormChat() {
                 }`}
               >
                 {isUser ? (
-                  <div className="h-10 w-10 aspect-square rounded-full border flex items-center justify-center bg-neutral-900">
+                  <div className="h-10 w-10 aspect-square text-green-600 border border-green-600 flex items-center justify-center bg-neutral-900">
                     <UserRound />
                   </div>
                 ) : (
-                  <div className="h-10 w-10 aspect-square rounded-full border flex items-center justify-center bg-neutral-900">
+                  <div className="h-10 w-10 aspect-square border text-neutral-700 border-neutral-700 flex items-center justify-center bg-neutral-900">
                     <Bot />
                   </div>
                 )}
@@ -84,14 +84,14 @@ export default function FormChat() {
                       return (
                         <div
                           key={`${message.id}-${i}`}
-                          className={`flex flex-col p-5 rounded-2xl border ${
+                          className={`flex flex-col p-5 border ${
                             isUser
-                              ? "bg-linear-to-r from-blue-600 to-indigo-500 text-white border-blue-700 items-end text-right"
+                              ? "bg-neutral-900 text-white border-green-700 border-2 items-end text-right"
                               : "bg-neutral-900 items-start text-left border-neutral-700"
                           }`}
                         >
-                          <div className="[&>p]:mb-3 [&>p]:last:mb-0 [&>ul]:mb-4 [&>ul>li]:list-disc [&>ul>li]:ml-5 [&>ol>li]:list-decimal [&>ol>li]:ml-5">
-                            {part.text}
+                          <div className="prose prose-invert max-w-none [&>p]:mb-3 [&>p:last-child]:mb-0 [&>ul]:mb-4 [&>ul]:list-disc [&>ul]:pl-5 [&>ol]:mb-4 [&>ol]:list-decimal [&>ol]:pl-5 [&>li]:mb-1 [&>h1]:text-xl [&>h1]:font-bold [&>h1]:mb-3 [&>h2]:text-lg [&>h2]:font-bold [&>h2]:mb-2 [&>h3]:font-bold [&>h3]:mb-2 [&>pre]:bg-neutral-800 [&>pre]:p-3 [&>pre]:rounded [&>pre]:overflow-x-auto [&>code]:bg-neutral-800 [&>code]:px-1 [&>code]:rounded">
+                            <ReactMarkdown>{part.text}</ReactMarkdown>
                           </div>
                         </div>
                       );
@@ -106,7 +106,7 @@ export default function FormChat() {
       <form
         data-loading={isLoading}
         onSubmit={handleChat}
-        className="form-container shrink-0 mt-4 w-full mx-auto flex flex-col gap-2 p-5 border border-gray-500 rounded-3xl bg-neutral-950"
+        className="form-container shrink-0 mt-4 w-full mx-auto flex flex-col gap-2 p-5 border border-neutral-700"
       >
         <textarea
           value={input}
@@ -121,9 +121,9 @@ export default function FormChat() {
         <div className="flex w-full justify-end">
           <button
             type="submit"
-            className={`h-12 w-30 flex items-center justify-center rounded-full bg-neutral-900 text-white border border-gray-500 transition-all ${
+            className={`h-12 w-30 flex items-center justify-center bg-neutral-900 text-green-600 border border-green-600 transition-all ${
               input.trim()
-                ? "opacity-100 cursor-pointer hover:bg-white hover:text-black hover:border-white"
+                ? "opacity-100 cursor-pointer hover:bg-green-800 hover:text-black hover:border-green-600 hover:text-green-300"
                 : "opacity-0 pointer-events-none"
             }`}
             disabled={isLoading || !input.trim()}
