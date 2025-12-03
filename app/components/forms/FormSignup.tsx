@@ -47,7 +47,7 @@ export default function FormSignup() {
           type="submit"
           className="px-8 py-3 text-green-500 font-mono font-medium border border-green-600 bg-green-500/10 hover:bg-green-500/20 hover:text-green-400 rounded transition-all duration-200"
         >
-          [SIGN-UP]
+          [SIGN_UP]
         </button>
       </div>
     </form>
