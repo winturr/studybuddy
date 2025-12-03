@@ -1,9 +1,20 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { useState, useRef, useEffect } from "react";
-import { UserRound, Bot, SendHorizonal, Loader2 } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import {
+  UserRound,
+  Bot,
+  SendHorizonal,
+  Loader2,
+  FileText,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { useSession } from "next-auth/react";
+import Files from "@/app/components/Files";
+import type { File } from "@prisma/client";
 
 function formatTimestamp(date: Date): string {
   const hours = date.getHours().toString().padStart(2, "0");
@@ -13,14 +24,36 @@ function formatTimestamp(date: Date): string {
 }
 
 export default function FormChat() {
+  const { data: session } = useSession();
   const [error, setError] = useState("");
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
   const [messageTimestamps, setMessageTimestamps] = useState<
     Record<string, Date>
   >({});
+  const [showFiles, setShowFiles] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Fetch files
+  const fetchFiles = useCallback(async () => {
+    if (!session?.user?.id) return;
+    try {
+      const res = await fetch(`/api/files`);
+      const data = await res.json();
+      if (data.success) {
+        setFiles(data.payload || []);
+      }
+    } catch (err) {
+      console.error("Failed to fetch files:", err);
+    }
+  }, [session?.user?.id]);
+
+  // Initial fetch
+  useEffect(() => {
+    fetchFiles();
+  }, [fetchFiles]);
 
   const { messages, sendMessage } = useChat({
     onError: (err) => {
@@ -78,7 +111,7 @@ export default function FormChat() {
   return (
     <div className="w-full h-full flex flex-col min-h-0">
       {/* Message Display Area */}
-      <div className="flex-1 flex flex-col gap-1 overflow-y-auto min-h-0 px-2 sm:px-4 text-sm sm:text-base">
+      <div className="chat-messages flex-1 flex flex-col gap-1 overflow-y-auto min-h-0 px-2 sm:px-4 text-sm sm:text-base">
         {messages &&
           messages.length > 0 &&
           messages.map((message) => {
@@ -96,7 +129,7 @@ export default function FormChat() {
                     <UserRound className="h-4 w-4 sm:h-5 sm:w-5" />
                   </div>
                 ) : (
-                  <div className="h-8 w-8 sm:h-10 sm:w-10 aspect-square border font-black text-green-600 border-green-600 flex items-center justify-center bg-neutral-900">
+                  <div className="h-8 w-8 sm:h-10 sm:w-10 aspect-square border font-black text-neutral-700 border-neutral-700 flex items-center justify-center bg-neutral-900">
                     <Bot className="h-4 w-4 sm:h-5 sm:w-5" />
                   </div>
                 )}
@@ -117,7 +150,7 @@ export default function FormChat() {
                               isUser ? "text-green-500/70" : "text-neutral-400"
                             }`}
                           >
-                            {!isUser && "TERM-001 "}
+                            {!isUser && "GROL_B3RT_V1 "}
                             {messageTimestamps[message.id]
                               ? formatTimestamp(messageTimestamps[message.id])
                               : formatTimestamp(new Date())}
@@ -135,6 +168,54 @@ export default function FormChat() {
         {/** Mark end of chat */}
         <div ref={messagesEndRef} className="h-1" />
       </div>
+
+      {/* Attached Files Display */}
+      {files.length > 0 && (
+        <div className="shrink-0 px-3 sm:px-5 py-2 border-t border-green-600/30">
+          <button
+            type="button"
+            onClick={() => setShowFiles(!showFiles)}
+            className="flex items-center gap-2 text-xs text-green-600/70 mb-2 font-mono hover:text-green-500 transition-colors w-full"
+          >
+            <span>ATTACHED_FILES: ({files.length})</span>
+            {showFiles ? (
+              <ChevronUp className="h-3 w-3" />
+            ) : (
+              <ChevronDown className="h-3 w-3" />
+            )}
+          </button>
+          {showFiles ? (
+            <div className="py-2">
+              <Files files={files} />
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {files.slice(0, 3).map((file) => (
+                <div
+                  key={file.id}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-neutral-800 border border-green-600/50 text-green-500 text-xs"
+                >
+                  <FileText className="h-3 w-3" />
+                  <span className="truncate max-w-[150px]">{file.name}</span>
+                  <span className="text-green-600/50">
+                    {file.status === "COMPLETED"
+                      ? "✓"
+                      : file.status === "PROCESSING"
+                      ? "..."
+                      : "!"}
+                  </span>
+                </div>
+              ))}
+              {files.length > 3 && (
+                <span className="text-green-600/50 text-xs self-center">
+                  +{files.length - 3} more
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       <form
         data-loading={isLoading}
         onSubmit={handleChat}
@@ -150,13 +231,13 @@ export default function FormChat() {
           aria-label="Type your message"
         ></textarea>
 
-        <div className="flex w-full justify-end">
+        <div className="flex w-full justify-end gap-2">
           <button
             type="submit"
-            className={`h-12 w-30 flex items-center justify-center bg-neutral-900 text-green-600 border-2 border-green-600 transition-all ${
+            className={`h-12 w-12 flex items-center justify-center bg-neutral-900 text-green-600 border-2 border-green-600 transition-all ${
               input.trim()
-                ? "opacity-100 cursor-pointer hover:bg-green-800 hover:text-black hover:border-green-600 hover:text-green-300"
-                : "opacity-0 pointer-events-none"
+                ? "opacity-100 cursor-pointer hover:bg-green-800 hover:text-green-300 hover:border-green-600"
+                : "opacity-50 pointer-events-none"
             }`}
             disabled={isLoading || !input.trim()}
           >
