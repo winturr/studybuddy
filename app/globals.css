@@ -27,7 +27,8 @@ form {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: "JetBrains Mono", Helvetica, sans-serif;
+  font-family: var(--font-jetbrains-mono), "JetBrains Mono", Helvetica,
+    sans-serif;
 }
 .button {
   @apply flex py-3 px-5 transition-all ease-in-out duration-200;
