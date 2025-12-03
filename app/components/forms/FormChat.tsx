@@ -96,7 +96,7 @@ export default function FormChat() {
                     <UserRound className="h-4 w-4 sm:h-5 sm:w-5" />
                   </div>
                 ) : (
-                  <div className="h-8 w-8 sm:h-10 sm:w-10 aspect-square border text-neutral-700 border-neutral-700 flex items-center justify-center bg-neutral-900">
+                  <div className="h-8 w-8 sm:h-10 sm:w-10 aspect-square border font-black text-neutral-500 border-neutral-900 flex items-center justify-center bg-neutral-900">
                     <Bot className="h-4 w-4 sm:h-5 sm:w-5" />
                   </div>
                 )}
@@ -109,14 +109,15 @@ export default function FormChat() {
                           className={`flex flex-col p-3 sm:p-5 border ${
                             isUser
                               ? "bg-neutral-900 text-green-600 border-green-700 border-2 items-end text-right"
-                              : "bg-neutral-900 text-neutral-300 items-start text-left border-neutral-700"
+                              : "bg-neutral-900 text-neutral-300 items-start text-left border-neutral-900"
                           }`}
                         >
                           <span
                             className={`font-mono text-xs mb-2 ${
-                              isUser ? "text-green-500/70" : "text-neutral-500"
+                              isUser ? "text-green-500/70" : "text-neutral-400"
                             }`}
                           >
+                            {!isUser && "TERM-001 "}
                             {messageTimestamps[message.id]
                               ? formatTimestamp(messageTimestamps[message.id])
                               : formatTimestamp(new Date())}
@@ -137,7 +138,7 @@ export default function FormChat() {
       <form
         data-loading={isLoading}
         onSubmit={handleChat}
-        className="form-container shrink-0 mt-2 sm:mt-4 w-full mx-auto flex flex-col gap-2 p-3 sm:p-5 border border-neutral-700"
+        className="form-container shrink-0 mt-2 sm:mt-4 w-full mx-auto flex flex-col gap-2 p-3 sm:p-5 border-2 border-green-600"
       >
         <textarea
           value={input}
@@ -152,7 +153,7 @@ export default function FormChat() {
         <div className="flex w-full justify-end">
           <button
             type="submit"
-            className={`h-12 w-30 flex items-center justify-center bg-neutral-900 text-green-600 border border-green-600 transition-all ${
+            className={`h-12 w-30 flex items-center justify-center bg-neutral-900 text-green-600 border-2 border-green-600 transition-all ${
               input.trim()
                 ? "opacity-100 cursor-pointer hover:bg-green-800 hover:text-black hover:border-green-600 hover:text-green-300"
                 : "opacity-0 pointer-events-none"

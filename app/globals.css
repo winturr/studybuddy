@@ -30,10 +30,26 @@ body {
   font-family: var(--font-jetbrains-mono), "JetBrains Mono", Helvetica,
     sans-serif;
 }
+
+/* CRT scan-line effect */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 92, 31, 0.2) 6px,
+    rgba(0, 0, 0, 0.2) 8px
+  );
+  z-index: -1;
+}
 .button {
   @apply flex py-3 px-5 transition-all ease-in-out duration-200;
   &.button-default {
-    @apply text-green-600 font-black border border-green-600 bg-green-500/8 hover:bg-green-800 mx-auto;
+    @apply text-green-600 font-medium border border-green-600 bg-green-500/8 hover:bg-green-800 mx-auto;
   }
 }
 
