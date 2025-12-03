@@ -8,16 +8,16 @@ export default function Header() {
         <Link href="/">
           <Logo />
         </Link>
-        <div className="flex gap-2 sm:gap-5">
+        <div className="flex gap-1 sm:gap-2 md:gap-5">
           <Link
             href="/login"
-            className="button button-default text-sm sm:text-base py-2 px-3 sm:py-3 sm:px-5"
+            className="button button-default text-xs sm:text-sm md:text-base py-1.5 px-2 sm:py-2 sm:px-3 md:py-3 md:px-5"
           >
             LOG-IN
           </Link>
           <Link
             href="/register"
-            className="button button-default text-sm sm:text-base py-2 px-3 sm:py-3 sm:px-5"
+            className="button button-default text-xs sm:text-sm md:text-base py-1.5 px-2 sm:py-2 sm:px-3 md:py-3 md:px-5"
           >
             SIGN-UP
           </Link>
