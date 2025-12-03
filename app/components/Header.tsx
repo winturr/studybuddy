@@ -19,7 +19,7 @@ export default function Header() {
             href="/register"
             className="button button-default text-sm sm:text-base py-2 px-3 sm:py-3 sm:px-5"
           >
-            SIGN UP
+            SIGN-UP
           </Link>
         </div>
       </div>

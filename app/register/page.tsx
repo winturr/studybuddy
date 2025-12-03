@@ -1,15 +1,23 @@
+import Bare from "../templates/Bare";
+import Logo from "../components/Logo";
+import FormSignup from "../components/forms/FormSignup";
 import Link from "next/link";
-import Default from "../templates/Default";
-import Logo from "@/app/components/Logo";
 
-export default function Register() {
+export default function Signup() {
   return (
-    <section>
-      <Default>
-        <div className="container mx-auto p-5">
-          <h1 className="text-4xl font-bold mb-5">Register Page</h1>
+    <Bare>
+      <div className="justify-center items-center flex flex-col gap-10 w-full max-w-md mx-auto">
+        <Link href="/">
+          <Logo />
+        </Link>
+        <div className="w-full">
+          <h1 className="text-2xl font-black text-center mb-6 text-green-600">
+            -- CREATE-AN-ACCOUNT --
+          </h1>
+          {/** Form */}
+          <FormSignup />
         </div>
-      </Default>
-    </section>
+      </div>
+    </Bare>
   );
 }

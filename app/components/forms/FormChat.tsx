@@ -96,7 +96,7 @@ export default function FormChat() {
                     <UserRound className="h-4 w-4 sm:h-5 sm:w-5" />
                   </div>
                 ) : (
-                  <div className="h-8 w-8 sm:h-10 sm:w-10 aspect-square border font-black text-neutral-500 border-neutral-900 flex items-center justify-center bg-neutral-900">
+                  <div className="h-8 w-8 sm:h-10 sm:w-10 aspect-square border font-black text-green-600 border-green-600 flex items-center justify-center bg-neutral-900">
                     <Bot className="h-4 w-4 sm:h-5 sm:w-5" />
                   </div>
                 )}
@@ -109,7 +109,7 @@ export default function FormChat() {
                           className={`flex flex-col p-3 sm:p-5 border ${
                             isUser
                               ? "bg-neutral-900 text-green-600 border-green-700 border-2 items-end text-right"
-                              : "bg-neutral-900 text-neutral-300 items-start text-left border-neutral-900"
+                              : "bg-neutral-900 text-neutral-300 border-neutral-800 border-2 items-start text-left"
                           }`}
                         >
                           <span
@@ -145,7 +145,7 @@ export default function FormChat() {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Write your message..."
-          className="w-full resize-none rounded-xl px-2 py-2 border-none focus:border-transparent focus:ring-0 text-sm sm:text-base"
+          className="w-full placeholder-green-700 caret-green-500 resize-none rounded-xl px-2 py-2 border-none focus:border-transparent focus:ring-0 text-sm sm:text-base"
           rows={2}
           aria-label="Type your message"
         ></textarea>

@@ -16,7 +16,7 @@
 form {
   input,
   textarea {
-    @apply border border-gray-300 rounded px-3 py-2 focus:outline-none;
+    @apply border border-green-600/50 rounded px-3 py-2 focus:outline-none;
   }
 }
 
