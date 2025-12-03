@@ -34,9 +34,6 @@ body {
   &.button-default {
     @apply text-white font-bold bg-blue-950 hover:bg-gray-800 mx-auto;
   }
-  &.button-submit {
-    @apply text-black font-medium bg-white rounded-2xl w-25 items-center justify-center hover:bg-neutral-500;
-  }
 }
 
 form textarea:focus,

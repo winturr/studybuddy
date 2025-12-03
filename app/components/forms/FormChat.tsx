@@ -2,7 +2,7 @@
 
 import { useChat } from "@ai-sdk/react";
 import { useState, useRef, useEffect } from "react";
-import { UserRound, Bot } from "lucide-react";
+import { UserRound, Bot, SendHorizonal, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 export default function FormChat() {
@@ -54,50 +54,59 @@ export default function FormChat() {
   }, [messages]);
 
   return (
-    <div className="w-full">
+    <div className="w-full h-full flex flex-col min-h-0">
       {/* Message Display Area */}
-      {messages && messages.length > 0 && (
-        <div className="flex-1 flex flex-col gap-1 overflow-y-auto pb-28 px-4">
-          {messages.map((message) => (
-            <div
-              data-loading={isLoading}
-              key={message.id}
-              className="flex gap-3 p-2 items-start"
-            >
-              {message.role === "user" ? (
-                <div className="h-10 w-10 aspect-square rounded-full border flex items-center justify-center bg-neutral-900">
-                  <UserRound />
-                </div>
-              ) : (
-                <div className="h-10 w-10 aspect-square rounded-full border flex items-center justify-center bg-neutral-900">
-                  <Bot />
-                </div>
-              )}
-              {message.parts.map((part, i) => {
-                switch (part.type) {
-                  case "text":
-                    return (
-                      <div
-                        key={`${message.id}-${i}`}
-                        className="bg-neutral-900 flex flex-col items-start text-left p-5 rounded-2xl border border-neutral-700"
-                      >
-                        <div className="[&>p]:mb-3 [&>p]:last:mb-0 [&>ul]:mb-4 [&>ul>li]:list-disc [&>ul>li]:ml-5 [&>ol>li]:list-decimal [&>ol>li]:ml-5">
-                          {part.text}
+      <div className="flex-1 flex flex-col gap-1 overflow-y-auto min-h-0 px-4">
+        {messages &&
+          messages.length > 0 &&
+          messages.map((message) => {
+            const isUser = message.role === "user";
+            return (
+              <div
+                data-loading={isLoading}
+                key={message.id}
+                className={`flex gap-3 p-2 items-start ${
+                  isUser ? "flex-row-reverse" : ""
+                }`}
+              >
+                {isUser ? (
+                  <div className="h-10 w-10 aspect-square rounded-full border flex items-center justify-center bg-neutral-900">
+                    <UserRound />
+                  </div>
+                ) : (
+                  <div className="h-10 w-10 aspect-square rounded-full border flex items-center justify-center bg-neutral-900">
+                    <Bot />
+                  </div>
+                )}
+                {message.parts.map((part, i) => {
+                  switch (part.type) {
+                    case "text":
+                      return (
+                        <div
+                          key={`${message.id}-${i}`}
+                          className={`flex flex-col p-5 rounded-2xl border ${
+                            isUser
+                              ? "bg-linear-to-r from-blue-600 to-indigo-500 text-white border-blue-700 items-end text-right"
+                              : "bg-neutral-900 items-start text-left border-neutral-700"
+                          }`}
+                        >
+                          <div className="[&>p]:mb-3 [&>p]:last:mb-0 [&>ul]:mb-4 [&>ul>li]:list-disc [&>ul>li]:ml-5 [&>ol>li]:list-decimal [&>ol>li]:ml-5">
+                            {part.text}
+                          </div>
                         </div>
-                      </div>
-                    );
-                }
-              })}
-            </div>
-          ))}
-          {/** Mark end of chat */}
-          <div ref={messagesEndRef} />
-        </div>
-      )}
+                      );
+                  }
+                })}
+              </div>
+            );
+          })}
+        {/** Mark end of chat */}
+        <div ref={messagesEndRef} className="h-1" />
+      </div>
       <form
         data-loading={isLoading}
         onSubmit={handleChat}
-        className="form-container fixed left-0 right-0 bottom-[var(--footer-height)] z-50 shadow-2xl w-dwh mx-5 flex flex-col gap-2 p-5 border border-gray-500 rounded-3xl"
+        className="form-container shrink-0 mt-4 w-full mx-auto flex flex-col gap-2 p-5 border border-gray-500 rounded-3xl bg-neutral-950"
       >
         <textarea
           value={input}
@@ -110,8 +119,20 @@ export default function FormChat() {
         ></textarea>
 
         <div className="flex w-full justify-end">
-          <button type="submit" className="button button-submit">
-            {isLoading ? "Sending…" : "Send"}
+          <button
+            type="submit"
+            className={`h-12 w-30 flex items-center justify-center rounded-full bg-neutral-900 text-white border border-gray-500 transition-all ${
+              input.trim()
+                ? "opacity-100 cursor-pointer hover:bg-white hover:text-black hover:border-white"
+                : "opacity-0 pointer-events-none"
+            }`}
+            disabled={isLoading || !input.trim()}
+          >
+            {isLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <SendHorizonal className="h-5 w-5" />
+            )}
           </button>
         </div>
         {error && (

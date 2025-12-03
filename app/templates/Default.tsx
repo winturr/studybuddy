@@ -4,12 +4,16 @@ import FormChat from "../components/forms/FormChat";
 
 export default function Default({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-col min-h-dvh">
-      <div className="sticky top-0 backdrop-blur-sm">
+    <div className="flex flex-col h-dvh overflow-hidden">
+      <div className="shrink-0">
         <Header />
       </div>
-      <main className="container mx-auto p-5 flex-1">{children}</main>
-      <Footer />
+      <main className="container mx-auto px-5 flex-1 overflow-hidden flex flex-col min-h-0">
+        {children}
+      </main>
+      <div className="shrink-0">
+        <Footer />
+      </div>
     </div>
   );
 }
