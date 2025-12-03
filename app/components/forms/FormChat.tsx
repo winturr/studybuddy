@@ -86,7 +86,7 @@ export default function FormChat() {
                           key={`${message.id}-${i}`}
                           className={`flex flex-col p-3 sm:p-5 border ${
                             isUser
-                              ? "bg-neutral-900 text-white border-green-700 border-2 items-end text-right"
+                              ? "bg-neutral-900 text-green-600 border-green-700 border-2 items-end text-right"
                               : "bg-neutral-900 items-start text-left border-neutral-700"
                           }`}
                         >
