@@ -31,9 +31,9 @@ Rules:
 Respond with only the memories or "NONE":`;
 
     const result = await generateText({
-      model: google("gemini-2.0-flash"),
+      model: google("gemini-2.5-flash"),
       prompt: extractionPrompt,
-      maxTokens: 500,
+      maxOutputTokens: 500,
     });
 
     const extractedText = result.text.trim();
