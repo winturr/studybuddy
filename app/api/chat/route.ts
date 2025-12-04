@@ -17,30 +17,30 @@ async function extractAndSaveMemories(
 ) {
   try {
     // Use AI to extract important facts/memories from the conversation
-    const extractionPrompt = `Analyze this conversation and extract any important personal facts, preferences, or information about the user that would be useful to remember for future conversations.
+    const extractionPrompt = `Analyze this conversation and extract any useful information worth remembering for future conversations.
 
 User message: "${userMessage}"
 Assistant response: "${assistantResponse}"
 
+What to save:
+1. Personal facts about the user (preferences, goals, interests, field of study, hobbies, learning style)
+2. Preferred name or nickname (if different from account name "${userName}")
+3. Important topics or concepts they're learning/working on
+4. Key facts or information they found useful or want to remember
+5. Projects, tasks, or assignments they mentioned
+6. Deadlines or important dates mentioned
+7. Relationships (e.g., "working with a team", "has a professor named X")
+
 Rules:
-1. Only extract NEW factual information about the user (not about topics they're asking about)
-2. Focus on: nicknames/preferred names, preferences, goals, interests, important dates, relationships, learning style, field of study, hobbies
-3. Be concise - each memory should be one clear sentence
-4. If there's nothing important to remember, respond with "NONE"
-5. Format each memory on a new line, prefixed with category in brackets like: [preference] User prefers visual learning
+- Be concise - each memory should be one clear sentence
+- If there's nothing worth remembering, respond with "NONE"
+- Format each memory on a new line, prefixed with category in brackets like: [topic] User is studying machine learning algorithms
+- Categories: preference, goal, interest, topic, project, deadline, relationship, fact, context
 
-DO NOT SAVE these (we already know them):
-- The user's account name is "${userName}" - don't save this as a memory
-- Basic greetings or small talk
-- Information that was just asked about (topics, not personal facts)
-- Anything the assistant said that isn't about the user personally
-
-Only save information the USER explicitly shared about THEMSELVES, such as:
-- "Call me [nickname]" or "I prefer to be called [name]" (preferred name different from account name)
-- "I'm studying [subject]" or "I'm a [profession/student type]"
-- "I learn best by [method]"
-- "My goal is [goal]"
-- Personal preferences, interests, or facts they shared
+DO NOT save:
+- The user's account name "${userName}" (we already know this)
+- Generic greetings or small talk with no substance
+- Duplicate information already covered by another memory
 
 Respond with only the memories or "NONE":`;
 
@@ -254,6 +254,7 @@ export async function POST(req: Request) {
     10. If the user's name is Gilbert, make light-hearted jokes about your name being Grol-b3rt. It reminds you of them.
     11. Use the MEMORIES section to personalize your responses. These are facts you've learned about the user from previous conversations.
     12. Stick to your saved memories - do not make up new facts about the user. Be very confident in your memories.
+    13. Also, you don't have to always mention memories about the user in every response - use them naturally where relevant.
 
     ${
       memoriesContext
