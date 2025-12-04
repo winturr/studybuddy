@@ -18,34 +18,61 @@ const GEMINI_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY as string;
 const fileManager = new GoogleAIFileManager(GEMINI_API_KEY);
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
-// TEXT SPLITTER
+// TEXT SPLITTER - Optimized for better semantic retrieval
 function chunkText(
   text: string,
-  chunkSize: number = 1000,
-  overlap: number = 200
+  chunkSize: number = 1500, // Larger chunks = more context per retrieval
+  overlap: number = 300 // More overlap = better continuity
 ) {
   if (!text || text.length === 0) return [];
   const chunks: string[] = [];
   let start = 0;
 
-  while (start < text.length) {
-    const end = start + chunkSize;
-    let chunk = text.slice(start, end);
+  // Split by paragraphs first for more semantic boundaries
+  const paragraphs = text.split(/\n\n+/);
+  let currentChunk = "";
 
-    if (end < text.length) {
-      const lastPeriod = chunk.lastIndexOf(".");
-      if (lastPeriod > 0 && lastPeriod > chunk.length * 0.5) {
-        chunk = chunk.slice(0, lastPeriod + 1);
-      }
-    }
-
-    chunks.push(chunk);
-
-    const step = chunk.length - overlap;
-    if (step <= 0) {
-      start = text.length;
+  for (const paragraph of paragraphs) {
+    // If adding this paragraph would exceed chunk size, save current and start new
+    if (
+      currentChunk.length + paragraph.length > chunkSize &&
+      currentChunk.length > 0
+    ) {
+      chunks.push(currentChunk.trim());
+      // Keep overlap from end of previous chunk
+      const overlapText = currentChunk.slice(-overlap);
+      currentChunk = overlapText + "\n\n" + paragraph;
     } else {
-      start += step;
+      currentChunk += (currentChunk ? "\n\n" : "") + paragraph;
+    }
+  }
+
+  // Don't forget the last chunk
+  if (currentChunk.trim().length > 0) {
+    chunks.push(currentChunk.trim());
+  }
+
+  // Fallback: if no paragraph-based chunks, use character-based splitting
+  if (chunks.length === 0) {
+    while (start < text.length) {
+      const end = start + chunkSize;
+      let chunk = text.slice(start, end);
+
+      if (end < text.length) {
+        const lastPeriod = chunk.lastIndexOf(".");
+        if (lastPeriod > 0 && lastPeriod > chunk.length * 0.5) {
+          chunk = chunk.slice(0, lastPeriod + 1);
+        }
+      }
+
+      chunks.push(chunk);
+
+      const step = chunk.length - overlap;
+      if (step <= 0) {
+        start = text.length;
+      } else {
+        start += step;
+      }
     }
   }
 

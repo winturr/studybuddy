@@ -5,52 +5,75 @@ import { authOptions } from "@/app/lib/authOptions";
 import { embed } from "ai";
 import prisma from "@/app/lib/prisma";
 
+// Minimum similarity threshold - chunks below this are likely not relevant
+const SIMILARITY_THRESHOLD = 0.35;
+
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   const user = session?.user;
   const name = user?.name || "Guest";
 
   const { messages } = await req.json();
+
+  // Get the last few user messages for better context understanding
+  const recentUserMessages = messages
+    .filter((m: any) => m.role === "user")
+    .slice(-3)
+    .map((m: any) => m.content)
+    .join(" ");
+
   const lastUserMessage = messages[messages.length - 1]?.content ?? "";
 
   // -------------------------------------
   // 1. If logged in -> run RAG retrieval
   // -------------------------------------
   let ragContext = "";
+  let sourceFiles: string[] = [];
 
-  if (session) {
-    // 1.1 Create embedding for the user's query
+  if (session && user?.id) {
+    // 1.1 Create embedding for the user's query (use recent context for better retrieval)
+    const queryForEmbedding = recentUserMessages || lastUserMessage;
     const queryEmbedding = await embed({
       model: google.textEmbedding("text-embedding-004"),
-      value: lastUserMessage,
+      value: queryForEmbedding,
     });
 
-    // 1.2 Vector similarity search in Neon PostgreSQL
-    const results = await prisma.$queryRawUnsafe<
+    const vectorString = JSON.stringify(queryEmbedding.embedding);
+
+    // 1.2 Vector similarity search with JOIN for file names and similarity filtering
+    const results = await prisma.$queryRaw<
       {
         content: string;
         metadata: any;
         similarity: number;
+        fileName: string;
       }[]
-    >(`
+    >`
       SELECT 
-        "content",
-        "metadata",
-        1 - ("vector" <=> '${JSON.stringify(
-          queryEmbedding.embedding
-        )}') as similarity
-      FROM "Embedding"
-      WHERE "fileId" IN (
-        SELECT id FROM "File"
-        WHERE "userId" = '${user?.id}' AND status = 'COMPLETED'
-      )
-      ORDER BY "vector" <=> '${JSON.stringify(queryEmbedding.embedding)}'
-      LIMIT 5;
-    `);
+        e."content",
+        e."metadata",
+        1 - (e."vector" <=> ${vectorString}::vector) as similarity,
+        f."name" as "fileName"
+      FROM "Embedding" e
+      INNER JOIN "File" f ON e."fileId" = f."id"
+      WHERE f."userId" = ${user.id} 
+        AND f."status" = 'COMPLETED'
+        AND 1 - (e."vector" <=> ${vectorString}::vector) > ${SIMILARITY_THRESHOLD}
+      ORDER BY e."vector" <=> ${vectorString}::vector
+      LIMIT 8;
+    `;
 
-    // 1.3 Combine retrieved chunks
+    // 1.3 Combine retrieved chunks with source attribution
     if (results.length > 0) {
-      ragContext = results.map((r) => r.content).join("\n\n---\n\n");
+      sourceFiles = [...new Set(results.map((r) => r.fileName))];
+      ragContext = results
+        .map(
+          (r, i) =>
+            `[Source: ${r.fileName} | Relevance: ${(r.similarity * 100).toFixed(
+              0
+            )}%]\n${r.content}`
+        )
+        .join("\n\n---\n\n");
     }
   }
 
@@ -84,19 +107,33 @@ export async function POST(req: Request) {
     5. Write in a friendly, conversational tone.
     6. Use paragraphs and bullet points for clarity.
     
-    Use the RAG context below if it is relevant to the user's question.
-    If no files have been uploaded or the RAG context is not relevant, answer normally.
-    If the user hasn't uploaded PDFs yet, gently remind them to upload files so you can provide better, personalized tutoring.
+    IMPORTANT INSTRUCTIONS FOR USING CONTEXT:
+    1. You have access to the user's uploaded study materials below.
+    2. When answering questions, ALWAYS check the RAG context first for relevant information.
+    3. If the context contains relevant information, use it to provide accurate, specific answers.
+    4. Cite which file the information comes from when referencing the context.
+    5. If the context doesn't contain relevant information for the question, you may answer from general knowledge but mention that the answer isn't from their documents.
+    6. If no documents are uploaded yet, encourage the user to upload their study materials.
+    7. DO NOT answer questions solely from your general knowledge if relevant information is available in the user's documents. Rely on the documents.
+    8. DO NOT answer questions that are not present in the files given by the user, DO NOT USE GENERAL KNOWLEDGE.
 
-    --- RAG CONTEXT START ---
-    ${ragContext || "No relevant uploaded file content found."}
-    --- RAG CONTEXT END ---`;
+    ${
+      sourceFiles.length > 0
+        ? `\nFiles available: ${sourceFiles.join(", ")}`
+        : ""
+    }
+    i
+    --- RAG CONTEXT FROM USER'S DOCUMENTS ---
+    ${ragContext || "No relevant content found in uploaded documents."}
+    --- END OF CONTEXT ---
+    
+    Remember: Prioritize information from the user's documents when available.`;
 
   const result = streamText({
     model: google("gemini-2.5-flash"),
     messages: convertToModelMessages(messages),
     system: systemPrompt,
-    maxOutputTokens: session ? 1000 : 300,
+    maxOutputTokens: session ? 5000 : 1000,
   });
 
   return result.toUIMessageStreamResponse();
