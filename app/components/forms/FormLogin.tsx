@@ -150,7 +150,10 @@ export default function FormLogin() {
       className="flex flex-col gap-3 sm:gap-4 w-full max-w-md mx-auto p-4 sm:p-6"
     >
       <div className="flex flex-col gap-1.5 sm:gap-2">
-        <label htmlFor="email" className="text-green-500 text-xs sm:text-sm font-mono">
+        <label
+          htmlFor="email"
+          className="text-green-500 text-xs sm:text-sm font-mono"
+        >
           {">"} email:
         </label>
         <input
@@ -170,7 +173,10 @@ export default function FormLogin() {
         )}
       </div>
       <div className="flex flex-col gap-1.5 sm:gap-2">
-        <label htmlFor="password" className="text-green-500 text-xs sm:text-sm font-mono">
+        <label
+          htmlFor="password"
+          className="text-green-500 text-xs sm:text-sm font-mono"
+        >
           {">"} password:
         </label>
         <input

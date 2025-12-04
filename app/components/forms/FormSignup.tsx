@@ -40,7 +40,10 @@ export default function FormSignup() {
       noValidate
     >
       <div className="flex flex-col gap-1.5 sm:gap-2">
-        <label htmlFor="name" className="text-green-500 text-xs sm:text-sm font-mono">
+        <label
+          htmlFor="name"
+          className="text-green-500 text-xs sm:text-sm font-mono"
+        >
           {">"} name:
         </label>
         <input
@@ -71,7 +74,10 @@ export default function FormSignup() {
         )}
       </div>
       <div className="flex flex-col gap-1.5 sm:gap-2">
-        <label htmlFor="email" className="text-green-500 text-xs sm:text-sm font-mono">
+        <label
+          htmlFor="email"
+          className="text-green-500 text-xs sm:text-sm font-mono"
+        >
           {">"} email:
         </label>
         <input
@@ -102,7 +108,10 @@ export default function FormSignup() {
         )}
       </div>
       <div className="flex flex-col gap-1.5 sm:gap-2">
-        <label htmlFor="password" className="text-green-500 text-xs sm:text-sm font-mono">
+        <label
+          htmlFor="password"
+          className="text-green-500 text-xs sm:text-sm font-mono"
+        >
           {">"} password:
         </label>
         <input
