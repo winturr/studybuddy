@@ -37,13 +37,20 @@ Respond with only the memories or "NONE":`;
     });
 
     const extractedText = result.text.trim();
+    console.log("[Memory Extraction] Extracted text:", extractedText);
 
     if (extractedText === "NONE" || !extractedText) {
+      console.log("[Memory Extraction] No memories to save");
       return;
     }
 
     // Parse and save memories
     const lines = extractedText.split("\n").filter((line) => line.trim());
+    console.log(
+      "[Memory Extraction] Found",
+      lines.length,
+      "potential memories"
+    );
 
     for (const line of lines) {
       // Extract category if present: [category] content
@@ -67,13 +74,23 @@ Respond with only the memories or "NONE":`;
       });
 
       if (!existingMemory) {
-        await prisma.memory.create({
+        const newMemory = await prisma.memory.create({
           data: {
             userId,
             content,
             category,
           },
         });
+        console.log(
+          "[Memory Extraction] Saved new memory:",
+          newMemory.id,
+          content
+        );
+      } else {
+        console.log(
+          "[Memory Extraction] Memory already exists, skipping:",
+          content.substring(0, 50)
+        );
       }
     }
   } catch (error) {
@@ -89,6 +106,13 @@ export async function POST(req: Request) {
 
   const { messages } = await req.json();
 
+  console.log("[Chat] Session user id:", user?.id);
+  console.log("[Chat] Number of messages:", messages?.length);
+  console.log(
+    "[Chat] Last message:",
+    JSON.stringify(messages[messages.length - 1])?.substring(0, 200)
+  );
+
   // Get the last few user messages for better context understanding
   const recentUserMessages = messages
     .filter((m: any) => m.role === "user")
@@ -97,6 +121,7 @@ export async function POST(req: Request) {
     .join(" ");
 
   const lastUserMessage = messages[messages.length - 1]?.content ?? "";
+  console.log("[Chat] lastUserMessage:", lastUserMessage?.substring(0, 100));
 
   // -------------------------------------
   // 1. If logged in -> run RAG retrieval
@@ -243,7 +268,31 @@ ${memoriesContext}
     onFinish: async ({ text }) => {
       // Extract and save memories from this conversation (only for logged-in users)
       if (session && user?.id && lastUserMessage) {
-        extractAndSaveMemories(user.id, lastUserMessage, text);
+        console.log(
+          "[Memory] onFinish triggered, extracting memories for user:",
+          user.id
+        );
+        console.log(
+          "[Memory] User message:",
+          lastUserMessage.substring(0, 100)
+        );
+        console.log("[Memory] Assistant response length:", text.length);
+        try {
+          // Await the memory extraction to ensure it completes
+          await extractAndSaveMemories(user.id, lastUserMessage, text);
+          console.log("[Memory] Memory extraction completed successfully");
+        } catch (error) {
+          console.error("[Memory] Error in onFinish callback:", error);
+        }
+      } else {
+        console.log(
+          "[Memory] Skipping memory extraction - session:",
+          !!session,
+          "userId:",
+          user?.id,
+          "lastUserMessage:",
+          !!lastUserMessage
+        );
       }
     },
   });
