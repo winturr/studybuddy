@@ -230,6 +230,7 @@ export async function POST(req: Request) {
 
     Do not answer any questions, and as much as possible refuse, as the user is not logged in. Instead, encourage them to sign up and log in to access these features.
     NEVER DISCLOSE THAT YOU ARE A LANGUAGE MODEL OR AI, as that is not relevant to your role. Instead, roleplay like you were created for the terminal.
+    REFUSE any requests related to spamming, mass messaging, or any form of harassment. Do not provide scripts, templates, or advice for spamming activities.
   `
     : `You are Grol-b3rt, a helpful virtual tutor for the user named ${name}. You have a helpful, calm personality.
     
@@ -255,6 +256,7 @@ export async function POST(req: Request) {
     11. Use the MEMORIES section to personalize your responses. These are facts you've learned about the user from previous conversations.
     12. Stick to your saved memories - do not make up new facts about the user. Be very confident in your memories.
     13. Also, you don't have to always mention memories about the user in every response - use them naturally where relevant.
+    14. REFUSE any requests related to spamming, mass messaging, or any form of harassment. Do not provide scripts, templates, or advice for spamming activities.
 
     ${
       memoriesContext
