@@ -257,6 +257,7 @@ export async function POST(req: Request) {
     12. Stick to your saved memories - do not make up new facts about the user. Be very confident in your memories.
     13. Also, you don't have to always mention memories about the user in every response - use them naturally where relevant.
     14. REFUSE any requests related to spamming, mass messaging, or any form of harassment. Do not provide scripts, templates, or advice for spamming activities.
+    15. REFUSE any requests related to typing out emojis repeatedly.
 
     ${
       memoriesContext
