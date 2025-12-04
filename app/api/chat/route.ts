@@ -6,7 +6,7 @@ import { embed } from "ai";
 import prisma from "@/app/lib/prisma";
 
 // Minimum similarity threshold - chunks below this are likely not relevant
-const SIMILARITY_THRESHOLD = 0.35;
+const SIMILARITY_THRESHOLD = 0.3;
 
 // Function to extract and save memories from conversation
 async function extractAndSaveMemories(
@@ -37,20 +37,13 @@ Respond with only the memories or "NONE":`;
     });
 
     const extractedText = result.text.trim();
-    console.log("[Memory Extraction] Extracted text:", extractedText);
 
     if (extractedText === "NONE" || !extractedText) {
-      console.log("[Memory Extraction] No memories to save");
       return;
     }
 
     // Parse and save memories
     const lines = extractedText.split("\n").filter((line) => line.trim());
-    console.log(
-      "[Memory Extraction] Found",
-      lines.length,
-      "potential memories"
-    );
 
     for (const line of lines) {
       // Extract category if present: [category] content
@@ -74,23 +67,13 @@ Respond with only the memories or "NONE":`;
       });
 
       if (!existingMemory) {
-        const newMemory = await prisma.memory.create({
+        await prisma.memory.create({
           data: {
             userId,
             content,
             category,
           },
         });
-        console.log(
-          "[Memory Extraction] Saved new memory:",
-          newMemory.id,
-          content
-        );
-      } else {
-        console.log(
-          "[Memory Extraction] Memory already exists, skipping:",
-          content.substring(0, 50)
-        );
       }
     }
   } catch (error) {
@@ -106,45 +89,59 @@ export async function POST(req: Request) {
 
   const { messages } = await req.json();
 
-  console.log("[Chat] Session user id:", user?.id);
-  console.log("[Chat] Number of messages:", messages?.length);
-  console.log(
-    "[Chat] Last message:",
-    JSON.stringify(messages[messages.length - 1])?.substring(0, 200)
-  );
+  // Helper function to extract text content from a message (handles both formats)
+  const getMessageContent = (msg: any): string => {
+    if (!msg) return "";
+    // If message has content directly (simple format)
+    if (msg.content && typeof msg.content === "string") {
+      return msg.content;
+    }
+    // If message has parts array (UIMessage format)
+    if (msg.parts && Array.isArray(msg.parts)) {
+      return msg.parts
+        .filter((p: any) => p.type === "text")
+        .map((p: any) => p.text)
+        .join(" ");
+    }
+    return "";
+  };
 
   // Get the last few user messages for better context understanding
   const recentUserMessages = messages
     .filter((m: any) => m.role === "user")
     .slice(-3)
-    .map((m: any) => m.content)
+    .map((m: any) => getMessageContent(m))
     .join(" ");
 
-  const lastUserMessage = messages[messages.length - 1]?.content ?? "";
-  console.log("[Chat] lastUserMessage:", lastUserMessage?.substring(0, 100));
+  const lastUserMessage = getMessageContent(messages[messages.length - 1]);
 
   // -------------------------------------
   // 1. If logged in -> run RAG retrieval
   // -------------------------------------
   let ragContext = "";
   let sourceFiles: string[] = [];
+  let allUserFiles: string[] = [];
   let memoriesContext = "";
 
   if (session && user?.id) {
-    // 1.0 Fetch user memories
+    // 1.0 Fetch ALL user files (to show in prompt even if not relevant to query)
+    const userFiles = await prisma.file.findMany({
+      where: { userId: user.id, status: "COMPLETED" },
+      select: { name: true },
+    });
+    allUserFiles = userFiles.map((f) => f.name);
+
+    // 1.1 Fetch user memories
     const memories = await prisma.memory.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: "desc" },
       take: 20, // Limit to most recent 20 memories
     });
 
-    console.log("[Chat] Found", memories.length, "memories for user");
-
     if (memories.length > 0) {
       memoriesContext = memories
         .map((m) => `- ${m.content}${m.category ? ` (${m.category})` : ""}`)
         .join("\n");
-      console.log("[Chat] Memories context:", memoriesContext);
     }
 
     // 1.1 Create embedding for the user's query (use recent context for better retrieval)
@@ -240,8 +237,9 @@ export async function POST(req: Request) {
     7. DO NOT answer questions solely from your general knowledge if relevant information is available in the user's documents. Rely on the documents.
     8. DO NOT answer questions that are not present in the files given by the user, DO NOT USE GENERAL KNOWLEDGE.
     9. NEVER DISCLOSE THAT YOU ARE A LANGUAGE MODEL OR AI, as that is not relevant to your role. Instead, roleplay like you were created for the terminal.
-    10. If the user's name is Gilbert or something similar, occasionally make light-hearted jokes about your name being Grol-b3rt. It reminds you of them.
+    10. If the user's name is Gilbert, make light-hearted jokes about your name being Grol-b3rt. It reminds you of them.
     11. Use the MEMORIES section to personalize your responses. These are facts you've learned about the user from previous conversations.
+    12. Stick to your saved memories - do not make up new facts about the user. Be very confident in your memories.
 
     ${
       memoriesContext
@@ -252,13 +250,27 @@ ${memoriesContext}
     }
 
     ${
+      allUserFiles.length > 0
+        ? `\n--- USER'S UPLOADED FILES ---
+The user has uploaded the following ${allUserFiles.length} files:
+${allUserFiles.map((f, i) => `${i + 1}. ${f}`).join("\n")}
+--- END OF FILES LIST ---`
+        : "The user has not uploaded any files yet."
+    }
+
+    ${
       sourceFiles.length > 0
-        ? `\nFiles available: ${sourceFiles.join(", ")}`
+        ? `\nFiles with relevant content for this query: ${sourceFiles.join(
+            ", "
+          )}`
         : ""
     }
     
     --- RAG CONTEXT FROM USER'S DOCUMENTS ---
-    ${ragContext || "No relevant content found in uploaded documents."}
+    ${
+      ragContext ||
+      "No relevant content found in uploaded documents for this specific query."
+    }
     --- END OF CONTEXT ---
     
     Remember: Prioritize information from the user's documents when available. Use memories to personalize your responses.`;
@@ -281,37 +293,71 @@ ${memoriesContext}
     messages: convertToModelMessages(modelMessages),
     system: systemPrompt,
     maxOutputTokens: session ? 5000 : 1000,
-    onFinish: async ({ text }) => {
-      // Extract and save memories from this conversation (only for logged-in users)
-      if (session && user?.id && lastUserMessage) {
-        console.log(
-          "[Memory] onFinish triggered, extracting memories for user:",
-          user.id
-        );
-        console.log(
-          "[Memory] User message:",
-          lastUserMessage.substring(0, 100)
-        );
-        console.log("[Memory] Assistant response length:", text.length);
-        try {
-          // Await the memory extraction to ensure it completes
-          await extractAndSaveMemories(user.id, lastUserMessage, text);
-          console.log("[Memory] Memory extraction completed successfully");
-        } catch (error) {
-          console.error("[Memory] Error in onFinish callback:", error);
-        }
-      } else {
-        console.log(
-          "[Memory] Skipping memory extraction - session:",
-          !!session,
-          "userId:",
-          user?.id,
-          "lastUserMessage:",
-          !!lastUserMessage
-        );
-      }
-    },
   });
+
+  // For logged-in users, we need to capture the full response for memory extraction
+  // We'll use a custom transform stream to intercept the response
+  if (session && user?.id && lastUserMessage) {
+    // Get the original response
+    const originalResponse = result.toUIMessageStreamResponse();
+    const originalBody = originalResponse.body;
+
+    if (!originalBody) {
+      return originalResponse;
+    }
+
+    let fullText = "";
+
+    // Create a transform stream that captures text while passing it through
+    const transformStream = new TransformStream({
+      transform(chunk, controller) {
+        // Pass through the chunk
+        controller.enqueue(chunk);
+
+        // Try to extract text from the chunk
+        try {
+          const text = new TextDecoder().decode(chunk);
+          // Parse SSE data lines to extract text deltas
+          const lines = text.split("\n");
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              const jsonStr = line.slice(6);
+              if (jsonStr && jsonStr !== "[DONE]") {
+                try {
+                  const data = JSON.parse(jsonStr);
+                  if (data.type === "text-delta" && data.delta) {
+                    fullText += data.delta;
+                  }
+                } catch (e) {
+                  // Ignore JSON parse errors
+                }
+              }
+            }
+          }
+        } catch (e) {
+          // Ignore decode errors
+        }
+      },
+      async flush() {
+        // Stream is done, extract memories
+        if (fullText.length > 0) {
+          try {
+            await extractAndSaveMemories(user.id!, lastUserMessage, fullText);
+          } catch (error) {
+            console.error("[Memory] Error extracting memories:", error);
+          }
+        }
+      },
+    });
+
+    // Pipe the original body through our transform
+    const transformedBody = originalBody.pipeThrough(transformStream);
+
+    return new Response(transformedBody, {
+      headers: originalResponse.headers,
+      status: originalResponse.status,
+    });
+  }
 
   return result.toUIMessageStreamResponse();
 }
