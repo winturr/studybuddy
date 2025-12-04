@@ -40,7 +40,8 @@ export async function POST(req: Request) {
 
     const vectorString = JSON.stringify(queryEmbedding.embedding);
 
-    // 1.2 Vector similarity search with JOIN for file names and similarity filtering
+    // 1.2 Vector similarity search - get top 2 chunks from EACH file to ensure all files are represented
+    // Uses window function to rank chunks within each file, then takes top 2 per file
     const results = await prisma.$queryRaw<
       {
         content: string;
@@ -49,18 +50,23 @@ export async function POST(req: Request) {
         fileName: string;
       }[]
     >`
-      SELECT 
-        e."content",
-        e."metadata",
-        1 - (e."vector" <=> ${vectorString}::vector) as similarity,
-        f."name" as "fileName"
-      FROM "Embedding" e
-      INNER JOIN "File" f ON e."fileId" = f."id"
-      WHERE f."userId" = ${user.id} 
-        AND f."status" = 'COMPLETED'
-        AND 1 - (e."vector" <=> ${vectorString}::vector) > ${SIMILARITY_THRESHOLD}
-      ORDER BY e."vector" <=> ${vectorString}::vector
-      LIMIT 8;
+      WITH ranked_chunks AS (
+        SELECT 
+          e."content",
+          e."metadata",
+          1 - (e."vector" <=> ${vectorString}::vector) as similarity,
+          f."name" as "fileName",
+          ROW_NUMBER() OVER (PARTITION BY f."id" ORDER BY e."vector" <=> ${vectorString}::vector) as rank
+        FROM "Embedding" e
+        INNER JOIN "File" f ON e."fileId" = f."id"
+        WHERE f."userId" = ${user.id} 
+          AND f."status" = 'COMPLETED'
+      )
+      SELECT "content", "metadata", similarity, "fileName"
+      FROM ranked_chunks
+      WHERE rank <= 2 AND similarity > ${SIMILARITY_THRESHOLD}
+      ORDER BY similarity DESC
+      LIMIT 12;
     `;
 
     // 1.3 Combine retrieved chunks with source attribution
