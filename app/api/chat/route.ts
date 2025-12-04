@@ -12,7 +12,8 @@ const SIMILARITY_THRESHOLD = 0.3;
 async function extractAndSaveMemories(
   userId: string,
   userMessage: string,
-  assistantResponse: string
+  assistantResponse: string,
+  userName: string
 ) {
   try {
     // Use AI to extract important facts/memories from the conversation
@@ -22,11 +23,24 @@ User message: "${userMessage}"
 Assistant response: "${assistantResponse}"
 
 Rules:
-1. Only extract factual information about the user (not about topics they're asking about)
-2. Focus on: names, preferences, goals, interests, important dates, relationships, learning style
+1. Only extract NEW factual information about the user (not about topics they're asking about)
+2. Focus on: nicknames/preferred names, preferences, goals, interests, important dates, relationships, learning style, field of study, hobbies
 3. Be concise - each memory should be one clear sentence
 4. If there's nothing important to remember, respond with "NONE"
 5. Format each memory on a new line, prefixed with category in brackets like: [preference] User prefers visual learning
+
+DO NOT SAVE these (we already know them):
+- The user's account name is "${userName}" - don't save this as a memory
+- Basic greetings or small talk
+- Information that was just asked about (topics, not personal facts)
+- Anything the assistant said that isn't about the user personally
+
+Only save information the USER explicitly shared about THEMSELVES, such as:
+- "Call me [nickname]" or "I prefer to be called [name]" (preferred name different from account name)
+- "I'm studying [subject]" or "I'm a [profession/student type]"
+- "I learn best by [method]"
+- "My goal is [goal]"
+- Personal preferences, interests, or facts they shared
 
 Respond with only the memories or "NONE":`;
 
@@ -342,7 +356,12 @@ ${allUserFiles.map((f, i) => `${i + 1}. ${f}`).join("\n")}
         // Stream is done, extract memories
         if (fullText.length > 0) {
           try {
-            await extractAndSaveMemories(user.id!, lastUserMessage, fullText);
+            await extractAndSaveMemories(
+              user.id!,
+              lastUserMessage,
+              fullText,
+              name
+            );
           } catch (error) {
             console.error("[Memory] Error extracting memories:", error);
           }

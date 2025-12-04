@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 export default function FormLogin() {
   // Refs
   const formRef = useRef<HTMLFormElement>(null);
+  const toastShownRef = useRef(false);
 
   // Hooks
   const router = useRouter();
@@ -32,6 +33,9 @@ export default function FormLogin() {
   // Handle
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
+    // Reset toast flag for new submission
+    toastShownRef.current = false;
 
     setPending(true);
 
@@ -90,8 +94,11 @@ export default function FormLogin() {
 
         console.log("Session: ", session);
 
-        // Do some toast
-        toast.success("Logged in successfully! Redirecting...");
+        // Do some toast (prevent duplicates)
+        if (!toastShownRef.current) {
+          toastShownRef.current = true;
+          toast.success("Logged in successfully! Redirecting...");
+        }
 
         // Wait 1 second before redirecting
         setTimeout(() => {

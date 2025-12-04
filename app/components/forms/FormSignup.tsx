@@ -1,7 +1,7 @@
 "use client";
 
 import { createUser } from "@/app/lib/actions/user";
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
@@ -15,6 +15,7 @@ export default function FormSignup() {
   };
 
   const { push: redirect } = useRouter();
+  const hasShownToast = useRef(false);
 
   const [state, handleSubmit, isPending] = useActionState(
     createUser,
@@ -22,13 +23,22 @@ export default function FormSignup() {
   );
 
   useEffect(() => {
+    // Prevent duplicate toasts
+    if (hasShownToast.current) return;
+
     if (state.success) {
+      hasShownToast.current = true;
       toast.success("User created successfully! Redirecting to login...");
       setTimeout(() => {
         redirect("/login");
       }, 1000);
     } else if (state.message) {
+      hasShownToast.current = true;
       toast.error(state.message);
+      // Reset after showing error so user can try again
+      setTimeout(() => {
+        hasShownToast.current = false;
+      }, 100);
     }
   }, [state, redirect]);
 

@@ -23,7 +23,12 @@ function formatTimestamp(date: Date): string {
   return `[${hours}:${minutes}:${seconds}]`;
 }
 
-export default function FormChat() {
+interface FormChatProps {
+  userName?: string | null;
+  isLoggedIn?: boolean;
+}
+
+export default function FormChat({ userName, isLoggedIn }: FormChatProps) {
   const { data: session } = useSession();
   const [error, setError] = useState("");
   const [input, setInput] = useState("");
@@ -110,6 +115,20 @@ export default function FormChat() {
 
   return (
     <div className="w-full h-full flex flex-col min-h-0">
+      {/* Welcome Header - only show when no messages */}
+      {messages.length === 0 && (
+        <div className="shrink-0 text-center py-2 sm:py-4 px-4">
+          <span className="bg-clip-text text-transparent text-3xl sm:text-5xl font-thin bg-green-500">
+            TERMINAL_ACCESS_{userName?.toUpperCase() || "GUEST"}
+          </span>
+          <p className="mt-1 sm:mt-2 text-sm sm:text-base text-green-600">
+            {isLoggedIn
+              ? "Welcome back! Your personalized study assistant is ready."
+              : "Create an account and log in to access your personalized study assistant."}
+          </p>
+        </div>
+      )}
+
       {/* Message Display Area */}
       <div className="chat-messages flex-1 flex flex-col gap-1 overflow-y-auto min-h-0 px-2 sm:px-4 text-sm sm:text-base">
         {messages &&
