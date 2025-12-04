@@ -52,7 +52,7 @@ export default function FormUploadFile({
     <form
       data-loading={isPending}
       action={handleSubmit}
-      className="flex flex-col gap-4 bg-neutral-900 p-4 border border-green-600/30"
+      className="flex flex-col gap-3 sm:gap-4 bg-neutral-900 p-3 sm:p-4 border border-green-600/30"
       noValidate
     >
       <div>
@@ -62,15 +62,15 @@ export default function FormUploadFile({
           accept=".pdf,.txt,.md"
           required
           onChange={handleFileChange}
-          className="block w-full text-sm text-green-500 font-mono
-            file:mr-4 file:py-2 file:px-4
+          className="block w-full text-xs sm:text-sm text-green-500 font-mono
+            file:mr-2 sm:file:mr-4 file:py-1.5 sm:file:py-2 file:px-3 sm:file:px-4
             file:border file:border-green-600
-            file:text-sm file:font-semibold
+            file:text-xs sm:file:text-sm file:font-semibold
             file:bg-neutral-800 file:text-green-500
             hover:file:bg-green-900/50 file:cursor-pointer
             file:transition-colors"
         />
-        <p className="mt-2 text-xs text-green-600/60 font-mono">
+        <p className="mt-1.5 sm:mt-2 text-[10px] sm:text-xs text-green-600/60 font-mono">
           Max 5MB. This will be added to your AI knowledge base.
         </p>
       </div>
@@ -78,19 +78,19 @@ export default function FormUploadFile({
       {/** Error / Success Feedback Section */}
 
       {clientError && (
-        <p className="text-sm text-red-500 font-mono border border-red-500/30 bg-red-500/10 p-2">
+        <p className="text-xs sm:text-sm text-red-500 font-mono border border-red-500/30 bg-red-500/10 p-1.5 sm:p-2">
           {clientError}
         </p>
       )}
 
       {state?.error && (
-        <p className="text-sm text-red-500 font-mono border border-red-500/30 bg-red-500/10 p-2">
+        <p className="text-xs sm:text-sm text-red-500 font-mono border border-red-500/30 bg-red-500/10 p-1.5 sm:p-2">
           Error: {state.error}
         </p>
       )}
 
       {state?.success && (
-        <p className="text-sm text-green-500 font-mono border border-green-500/30 bg-green-500/10 p-2">
+        <p className="text-xs sm:text-sm text-green-500 font-mono border border-green-500/30 bg-green-500/10 p-1.5 sm:p-2">
           {state.message}
         </p>
       )}
@@ -99,7 +99,7 @@ export default function FormUploadFile({
         <button
           type="submit"
           disabled={isPending}
-          className={`h-10 px-4 flex items-center justify-center gap-2 bg-neutral-900 text-green-600 border-2 border-green-600 transition-all font-mono text-sm ${
+          className={`h-8 sm:h-10 px-3 sm:px-4 flex items-center justify-center gap-2 bg-neutral-900 text-green-600 border-2 border-green-600 transition-all font-mono text-xs sm:text-sm ${
             isPending
               ? "opacity-50 cursor-wait"
               : "hover:bg-green-800 hover:text-green-300 hover:border-green-600 cursor-pointer"

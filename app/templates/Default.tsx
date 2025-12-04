@@ -8,7 +8,7 @@ export default function Default({ children }: { children: React.ReactNode }) {
       <div className="shrink-0">
         <Header />
       </div>
-      <main className="container mx-auto px-5 flex-1 overflow-hidden flex flex-col min-h-0">
+      <main className="container mx-auto px-3 sm:px-5 flex-1 overflow-hidden flex flex-col min-h-0">
         {children}
       </main>
       <div className="shrink-0">

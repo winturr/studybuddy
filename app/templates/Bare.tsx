@@ -12,7 +12,7 @@ export default function Bare({
   return (
     <section>
       <div
-        className={`container mx-auto min-h-dvh flex flex-col items-center justify-center gap-5 ${className}`}
+        className={`container mx-auto px-4 sm:px-6 min-h-dvh flex flex-col items-center justify-center gap-4 sm:gap-5 ${className}`}
       >
         {children}
       </div>

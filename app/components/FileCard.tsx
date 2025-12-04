@@ -15,15 +15,15 @@ export default function FileCard({ file }: { file: File }) {
       <div
         onClick={() => setShowModal(true)}
         title={file.name}
-        className="group relative bg-neutral-900 p-3 border border-green-600/50 overflow-hidden hover:border-green-500 hover:bg-neutral-800 transition-all cursor-pointer flex flex-col gap-2"
+        className="group relative bg-neutral-900 p-2 sm:p-3 border border-green-600/50 overflow-hidden hover:border-green-500 hover:bg-neutral-800 transition-all cursor-pointer flex flex-col gap-1 sm:gap-2"
       >
         <div className="text-center flex justify-center">
-          <FileText className="h-10 w-10 text-green-600/70 group-hover:text-green-500 transition-colors" />
+          <FileText className="h-7 w-7 sm:h-10 sm:w-10 text-green-600/70 group-hover:text-green-500 transition-colors" />
         </div>
-        <div className="text-xs font-mono text-green-500 truncate text-center">
+        <div className="text-[10px] sm:text-xs font-mono text-green-500 truncate text-center">
           {file.name}
         </div>
-        <div className="text-[10px] font-mono text-green-600/50 text-center">
+        <div className="text-[8px] sm:text-[10px] font-mono text-green-600/50 text-center">
           {file.status === "COMPLETED"
             ? "[READY]"
             : file.status === "PROCESSING"

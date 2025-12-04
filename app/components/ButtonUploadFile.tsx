@@ -12,10 +12,10 @@ export default function ButtonUploadFile() {
     <>
       <button
         onClick={() => setShowModal(true)}
-        className="h-12 w-12 flex items-center justify-center bg-neutral-900 text-green-600 border-2 border-green-600 transition-all opacity-100 cursor-pointer hover:bg-green-800 hover:text-green-300 hover:border-green-600"
+        className="h-9 w-9 sm:h-12 sm:w-12 flex items-center justify-center bg-neutral-900 text-green-600 border-2 border-green-600 transition-all opacity-100 cursor-pointer hover:bg-green-800 hover:text-green-300 hover:border-green-600"
         title="Upload file"
       >
-        <Upload className="h-5 w-5" />
+        <Upload className="h-4 w-4 sm:h-5 sm:w-5" />
       </button>
       {showModal && (
         <Modal

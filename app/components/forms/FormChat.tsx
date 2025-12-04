@@ -234,7 +234,7 @@ export default function FormChat() {
         <div className="flex w-full justify-end gap-2">
           <button
             type="submit"
-            className={`h-12 w-12 flex items-center justify-center bg-neutral-900 text-green-600 border-2 border-green-600 transition-all ${
+            className={`h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center bg-neutral-900 text-green-600 border-2 border-green-600 transition-all ${
               input.trim()
                 ? "opacity-100 cursor-pointer hover:bg-green-800 hover:text-green-300 hover:border-green-600"
                 : "opacity-50 pointer-events-none"
@@ -242,9 +242,9 @@ export default function FormChat() {
             disabled={isLoading || !input.trim()}
           >
             {isLoading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
+              <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
             ) : (
-              <SendHorizonal className="h-5 w-5" />
+              <SendHorizonal className="h-4 w-4 sm:h-5 sm:w-5" />
             )}
           </button>
         </div>
