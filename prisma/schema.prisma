@@ -21,6 +21,7 @@ model User {
   createdAt DateTime @default(now())
   files     File[]
   chats     Chat[]
+  memories  Memory[]
 }
 
 // --------------------------------------------------------
@@ -96,6 +97,25 @@ model Message {
   chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
+}
+
+// --------------------------------------------------------
+// 4. USER MEMORIES (Persistent facts learned from conversations)
+// --------------------------------------------------------
+model Memory {
+  id      String @id @default(cuid())
+  content String // The memory/fact about the user
+  
+  // Optional: categorize memories
+  category String? // e.g., "preference", "fact", "goal", "interest"
+  
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
 
 enum Role {

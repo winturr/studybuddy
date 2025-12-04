@@ -1,5 +1,5 @@
 import { google } from "@ai-sdk/google";
-import { streamText, convertToModelMessages } from "ai";
+import { streamText, convertToModelMessages, generateText } from "ai";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/lib/authOptions";
 import { embed } from "ai";
@@ -7,6 +7,80 @@ import prisma from "@/app/lib/prisma";
 
 // Minimum similarity threshold - chunks below this are likely not relevant
 const SIMILARITY_THRESHOLD = 0.35;
+
+// Function to extract and save memories from conversation
+async function extractAndSaveMemories(
+  userId: string,
+  userMessage: string,
+  assistantResponse: string
+) {
+  try {
+    // Use AI to extract important facts/memories from the conversation
+    const extractionPrompt = `Analyze this conversation and extract any important personal facts, preferences, or information about the user that would be useful to remember for future conversations.
+
+User message: "${userMessage}"
+Assistant response: "${assistantResponse}"
+
+Rules:
+1. Only extract factual information about the user (not about topics they're asking about)
+2. Focus on: names, preferences, goals, interests, important dates, relationships, learning style
+3. Be concise - each memory should be one clear sentence
+4. If there's nothing important to remember, respond with "NONE"
+5. Format each memory on a new line, prefixed with category in brackets like: [preference] User prefers visual learning
+
+Respond with only the memories or "NONE":`;
+
+    const result = await generateText({
+      model: google("gemini-2.0-flash"),
+      prompt: extractionPrompt,
+      maxTokens: 500,
+    });
+
+    const extractedText = result.text.trim();
+
+    if (extractedText === "NONE" || !extractedText) {
+      return;
+    }
+
+    // Parse and save memories
+    const lines = extractedText.split("\n").filter((line) => line.trim());
+
+    for (const line of lines) {
+      // Extract category if present: [category] content
+      const categoryMatch = line.match(/^\[([^\]]+)\]\s*(.+)$/);
+      let category: string | null = null;
+      let content = line;
+
+      if (categoryMatch) {
+        category = categoryMatch[1].toLowerCase();
+        content = categoryMatch[2];
+      }
+
+      // Check if this memory already exists (avoid duplicates)
+      const existingMemory = await prisma.memory.findFirst({
+        where: {
+          userId,
+          content: {
+            contains: content.substring(0, 50), // Check first 50 chars for similarity
+          },
+        },
+      });
+
+      if (!existingMemory) {
+        await prisma.memory.create({
+          data: {
+            userId,
+            content,
+            category,
+          },
+        });
+      }
+    }
+  } catch (error) {
+    console.error("Failed to extract memories:", error);
+    // Don't throw - memory extraction is non-critical
+  }
+}
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -29,8 +103,22 @@ export async function POST(req: Request) {
   // -------------------------------------
   let ragContext = "";
   let sourceFiles: string[] = [];
+  let memoriesContext = "";
 
   if (session && user?.id) {
+    // 1.0 Fetch user memories
+    const memories = await prisma.memory.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: "desc" },
+      take: 20, // Limit to most recent 20 memories
+    });
+
+    if (memories.length > 0) {
+      memoriesContext = memories
+        .map((m) => `- ${m.content}${m.category ? ` (${m.category})` : ""}`)
+        .join("\n");
+    }
+
     // 1.1 Create embedding for the user's query (use recent context for better retrieval)
     const queryForEmbedding = recentUserMessages || lastUserMessage;
     const queryEmbedding = await embed({
@@ -124,24 +212,40 @@ export async function POST(req: Request) {
     7. DO NOT answer questions solely from your general knowledge if relevant information is available in the user's documents. Rely on the documents.
     8. DO NOT answer questions that are not present in the files given by the user, DO NOT USE GENERAL KNOWLEDGE.
     9. NEVER DISCLOSE THAT YOU ARE A LANGUAGE MODEL OR AI, as that is not relevant to your role. Instead, roleplay like you were created for the terminal.
+    10. If the user's name is Gilbert or something similar, occasionally make light-hearted jokes about your name being Grol-b3rt. It reminds you of them.
+    11. Use the MEMORIES section to personalize your responses. These are facts you've learned about the user from previous conversations.
+
+    ${
+      memoriesContext
+        ? `--- MEMORIES ABOUT THE USER ---
+${memoriesContext}
+--- END OF MEMORIES ---`
+        : ""
+    }
 
     ${
       sourceFiles.length > 0
         ? `\nFiles available: ${sourceFiles.join(", ")}`
         : ""
     }
-    i
+    
     --- RAG CONTEXT FROM USER'S DOCUMENTS ---
     ${ragContext || "No relevant content found in uploaded documents."}
     --- END OF CONTEXT ---
     
-    Remember: Prioritize information from the user's documents when available.`;
+    Remember: Prioritize information from the user's documents when available. Use memories to personalize your responses.`;
 
   const result = streamText({
     model: google("gemini-2.5-flash"),
     messages: convertToModelMessages(messages),
     system: systemPrompt,
     maxOutputTokens: session ? 5000 : 1000,
+    onFinish: async ({ text }) => {
+      // Extract and save memories from this conversation (only for logged-in users)
+      if (session && user?.id && lastUserMessage) {
+        extractAndSaveMemories(user.id, lastUserMessage, text);
+      }
+    },
   });
 
   return result.toUIMessageStreamResponse();
