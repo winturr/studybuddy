@@ -138,10 +138,13 @@ export async function POST(req: Request) {
       take: 20, // Limit to most recent 20 memories
     });
 
+    console.log("[Chat] Found", memories.length, "memories for user");
+
     if (memories.length > 0) {
       memoriesContext = memories
         .map((m) => `- ${m.content}${m.category ? ` (${m.category})` : ""}`)
         .join("\n");
+      console.log("[Chat] Memories context:", memoriesContext);
     }
 
     // 1.1 Create embedding for the user's query (use recent context for better retrieval)
@@ -260,9 +263,22 @@ ${memoriesContext}
     
     Remember: Prioritize information from the user's documents when available. Use memories to personalize your responses.`;
 
+  // Convert messages to model format - handle both UIMessage format (with parts) and simple format (with content)
+  const modelMessages = messages.map((m: any) => {
+    if (m.parts) {
+      // Already in UIMessage format with parts array
+      return m;
+    }
+    // Convert simple { role, content } to UIMessage format
+    return {
+      ...m,
+      parts: [{ type: "text", text: m.content }],
+    };
+  });
+
   const result = streamText({
     model: google("gemini-2.5-flash"),
-    messages: convertToModelMessages(messages),
+    messages: convertToModelMessages(modelMessages),
     system: systemPrompt,
     maxOutputTokens: session ? 5000 : 1000,
     onFinish: async ({ text }) => {
