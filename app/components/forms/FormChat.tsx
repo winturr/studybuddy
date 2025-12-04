@@ -189,14 +189,16 @@ export default function FormChat() {
               <Files files={files} />
             </div>
           ) : (
-            <div className="flex flex-wrap gap-2">
-              {files.slice(0, 3).map((file) => (
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-green-600/30">
+              {files.map((file) => (
                 <div
                   key={file.id}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-neutral-800 border border-green-600/50 text-green-500 text-xs"
+                  className="flex items-center gap-1.5 px-2 py-1 bg-neutral-800 border border-green-600/50 text-green-500 text-xs shrink-0"
                 >
                   <FileText className="h-3 w-3" />
-                  <span className="truncate max-w-[150px]">{file.name}</span>
+                  <span className="truncate max-w-[80px] sm:max-w-[120px]">
+                    {file.name}
+                  </span>
                   <span className="text-green-600/50">
                     {file.status === "COMPLETED"
                       ? "✓"
@@ -206,11 +208,6 @@ export default function FormChat() {
                   </span>
                 </div>
               ))}
-              {files.length > 3 && (
-                <span className="text-green-600/50 text-xs self-center">
-                  +{files.length - 3} more
-                </span>
-              )}
             </div>
           )}
         </div>
